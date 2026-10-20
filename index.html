@@ -85,7 +85,7 @@ nav button{border:0;background:none;padding:11px 22px;border-radius:99px;font:60
   </section>
   <section class="card">
     <div class="hd"><h2>Expedientes comunitarios</h2><span class="mono" id="act"></span></div>
-    <p class="note" style="margin:0 0 6px">Con 3 vecinos se arma un expediente colectivo; con 10 queda listo para presentarse a la OEFA y a la municipalidad. En esta demo es una simulación: nada se envía realmente.</p>
+    <p class="note" style="margin:0 0 6px">Con 3 vecinos se arma un expediente colectivo; con 10 queda listo para presentarse a la OEFA y a la municipalidad. Prueba piloto: tu denuncia llega al equipo de AireSano, pero no se envía a la OEFA ni a la municipalidad.</p>
     <div id="list"></div>
   </section>
 </main>
@@ -161,10 +161,17 @@ function drawList(){
 $("desc").oninput=()=>{const n=$("desc").value.trim().length;$("cnt").textContent=n+" / 10 mín.";$("send").disabled=n<10};
 $("foto").onchange=e=>{const f=e.target.files[0],p=$("prev");p.innerHTML="";if(!f)return;const u=URL.createObjectURL(f);
  const el=document.createElement(f.type.startsWith("image")?"img":"video");el.className="pv";el.src=u;if(el.tagName=="VIDEO")el.controls=true;p.append(el)};
-$("send").onclick=()=>{
- R.unshift({z:$("zona").value,t:tipo,d:$("desc").value.trim(),n:1,j:true,ts:Date.now()});save();drawList();
- $("desc").value="";$("foto").value="";$("prev").innerHTML="";$("cnt").textContent="0 / 10 mín.";$("send").disabled=true;
- $("msg").textContent="✅ Denuncia registrada en esta demo (no se envía a ninguna autoridad). Compártela con tus vecinos para que se sumen.";
+const FORM_ACTION="https://docs.google.com/forms/d/e/1FAIpQLSfC-fgFVhRO6cxmxXHOqlkjHq5fFavjodyTlKHgakjia7l4yQ/formResponse";
+const FIX={"San Martín de Porres":"San Martin de Porres","Polvo o partículas":"Polvo o particulas"};
+$("send").onclick=async()=>{
+ const z=$("zona").value,d=$("desc").value.trim(),m=$("msg");
+ $("send").disabled=true;m.textContent="Enviando…";
+ try{
+  await fetch(FORM_ACTION,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({"entry.1670436611":FIX[z]||z,"entry.1785232015":FIX[tipo]||tipo,"entry.841080213":d}).toString()});
+ }catch(e){m.textContent="No se pudo enviar. Revisa tu conexión e inténtalo de nuevo.";$("send").disabled=false;return}
+ R.unshift({z,t:tipo,d,n:1,j:true,ts:Date.now()});save();drawList();
+ $("desc").value="";$("foto").value="";$("prev").innerHTML="";$("cnt").textContent="0 / 10 mín.";
+ m.textContent="✅ Denuncia enviada al equipo de AireSano (prueba piloto). No reemplaza la denuncia oficial ante la OEFA.";
 };
 function tab(n){
  $("v1").classList.toggle("hide",n!=1);$("v2").classList.toggle("hide",n!=2);
