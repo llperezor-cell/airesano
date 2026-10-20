@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ece7dc">
+<title>AireSano · Calidad del aire en Lima y Callao</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;1,300&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#ece7dc;--card:#f5f2ea;--ink:#1d2a23;--mut:#6a7168;--bd:#ddd6c6;--grn:#234d3c;--g:#3a8a5c;--y:#d49a1a;--r:#c4493a}
+*{box-sizing:border-box}html{color-scheme:light}
+body{margin:0;min-height:100vh;background:linear-gradient(#efeade,#e6e0d2);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:env(safe-area-inset-top,0px) 0 110px}
+.w{max-width:1060px;margin:0 auto;padding:0 18px}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+header{display:flex;align-items:center;gap:12px;padding:18px 0 14px;border-bottom:1px solid var(--bd);margin-bottom:18px;flex-wrap:wrap}
+.logo{width:42px;height:42px;border-radius:50%;background:var(--grn);display:grid;place-items:center;font-size:20px}
+h1{margin:0;font:700 32px/1 "Fraunces",Georgia,serif}h1 i{font-weight:300}
+.sub{color:var(--mut);font-size:13px}
+#stamp{margin-left:auto}#stamp:before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--g);margin-right:6px}
+.grid{display:grid;gap:16px}@media(min-width:820px){.grid{grid-template-columns:1.15fr 1fr;align-items:start}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:20px;box-shadow:0 8px 24px -16px rgba(40,40,20,.25)}
+h2{font:700 22px/1.1 "Fraunces",Georgia,serif;margin:0}
+.hd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;gap:8px}
+#map{width:100%;height:auto;display:block;border-radius:14px;border:1px solid var(--bd)}
+.zone{cursor:pointer}
+.lg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:14px}
+.lg div{border-top:3px solid;padding-top:6px;font-size:12px;color:var(--mut)}.lg b{display:block;color:var(--ink);font-size:13px}
+.link{background:none;border:0;color:var(--grn);text-decoration:underline;font:inherit;font-size:13px;padding:0;margin-top:12px;cursor:pointer}
+.pill{display:inline-block;padding:4px 10px;border-radius:99px;color:#fff;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.big{display:flex;align-items:center;gap:14px;margin:8px 0}
+.n{font:400 58px/1 "Fraunces",Georgia,serif}.big small{font-size:14px;color:var(--mut)}
+.tip{border-left:3px solid;border-radius:8px;padding:10px 12px;margin:10px 0 14px;font-size:14px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--grn);color:#fff;border:0;border-radius:12px;padding:13px;font:700 15px system-ui,sans-serif;cursor:pointer;margin-top:6px}
+.btn:disabled{opacity:.45;cursor:default}
+.rk{display:flex;gap:12px;padding:10px;border-radius:10px;cursor:pointer;align-items:center}.rk.on{background:#e9e3d3}.rk span:nth-child(2){flex:1}
+.rk b{font-family:ui-monospace,Menlo,monospace;font-weight:500}
+label{display:block;font-weight:700;font-size:14px;margin:14px 0 6px}
+select,textarea{width:100%;padding:12px;border:1px solid var(--bd);border-radius:12px;background:#ebe5d6;color:var(--ink);font:inherit}
+textarea{min-height:90px;resize:vertical}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--bd);background:#ebe5d6;border-radius:99px;padding:8px 14px;font:inherit;font-size:14px;cursor:pointer;color:var(--ink)}.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.up{display:block;border:1.5px dashed var(--bd);border-radius:12px;padding:14px;cursor:pointer;font-size:14px}.up small{display:block;color:var(--mut)}.up input{display:none}
+.pv{max-width:100%;max-height:180px;border-radius:10px;margin-top:8px}
+.ex{padding:12px 0;border-top:1px solid var(--bd)}.ex:first-child{border-top:0}
+.segs{display:flex;gap:4px;margin:8px 0 4px}.segs i{flex:1;height:4px;border-radius:9px;background:var(--bd)}.segs i.f{background:var(--grn)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sum{border:0;background:var(--grn);color:#fff;border-radius:99px;padding:6px 14px;font:600 13px system-ui,sans-serif;cursor:pointer;white-space:nowrap}.sum:disabled{background:var(--g);cursor:default}
+nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;gap:4px;background:var(--card);border:1px solid var(--bd);border-radius:99px;padding:6px;box-shadow:0 10px 30px -10px rgba(0,0,0,.3);z-index:5}
+nav button{border:0;background:none;padding:11px 22px;border-radius:99px;font:600 15px system-ui,sans-serif;color:var(--mut);cursor:pointer}nav button.on{background:var(--ink);color:#fff}
+.note{color:var(--mut);font-size:13px;margin:14px 4px}
+.hide{display:none!important}
+.ov{position:fixed;inset:0;background:rgba(20,25,20,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}.ov .card{max-width:420px}
+.l3{display:flex;gap:10px;margin:10px 0;font-size:14px}.l3 .pill{min-width:84px;text-align:center;height:fit-content}
+</style></head><body>
+<div class="w">
+<header><div class="logo">🌿</div><div><h1>Aire<i>Sano</i></h1><div class="sub">Calidad del aire y denuncia colectiva · Lima y Callao</div></div><div class="mono" id="stamp"></div></header>
+
+<main id="v1" class="grid">
+  <section class="card">
+    <div class="hd"><h2>Mapa de calor</h2><span class="mono">PM2.5 · µg/m³</span></div>
+    <svg id="map" viewBox="0 0 544 510" role="img" aria-label="Mapa de calor simulado de Lima y Callao"></svg>
+    <div class="lg">
+      <div style="border-color:var(--g)"><b>0 – 25</b>Aceptable</div>
+      <div style="border-color:var(--y)"><b>26 – 50</b>Precaución</div>
+      <div style="border-color:var(--r)"><b>&gt; 50</b>Peligroso</div>
+    </div>
+    <button class="link" id="help">¿Cómo leer el mapa?</button>
+  </section>
+  <div>
+    <section class="card" id="det"></section>
+    <section class="card" style="margin-top:16px"><div class="hd"><h2>Ranking de distritos</h2><span class="mono">Peor → mejor</span></div><div id="rk"></div></section>
+  </div>
+</main>
+
+<main id="v2" class="grid hide">
+  <section class="card">
+    <div class="hd"><h2>Nueva denuncia vecinal</h2><span class="mono">Paso 1 de 1</span></div>
+    <label for="zona" style="margin-top:0">Zona</label><select id="zona"></select>
+    <label>¿Qué observas?</label><div class="chips" id="chips"></div>
+    <label for="desc">Descripción <span class="mono" id="cnt" style="float:right;font-weight:400">0 / 10 mín.</span></label>
+    <textarea id="desc" placeholder="Ej.: humo oscuro desde las 7 a. m. frente al parque industrial"></textarea>
+    <label>Evidencia</label>
+    <label class="up" style="font-weight:400;margin:0">📷 <b>Adjuntar foto o video</b><small>Opcional · en esta demo solo se muestra una vista previa</small><input type="file" id="foto" accept="image/*,video/*"></label>
+    <div id="prev"></div>
+    <button class="btn" id="send" disabled>Enviar denuncia →</button>
+    <p class="note" id="msg" style="margin-bottom:0"></p>
+  </section>
+  <section class="card">
+    <div class="hd"><h2>Expedientes comunitarios</h2><span class="mono" id="act"></span></div>
+    <p class="note" style="margin:0 0 6px">Con 3 vecinos se arma un expediente colectivo; con 10 queda listo para presentarse a la OEFA y a la municipalidad. En esta demo es una simulación: nada se envía realmente.</p>
+    <div id="list"></div>
+  </section>
+</main>
+<p class="note">ⓘ Datos simulados para validar el MVP. En la versión real vendrán de sensores o fuentes oficiales.</p>
+</div>
+
+<nav><button id="b1" class="on">🗺️ Mapa</button><button id="b2">📣 Denunciar</button></nav>
+
+<div class="ov" id="intro" role="dialog" aria-modal="true"><div class="card">
+  <h2>¿Cómo leer el mapa?</h2>
+  <p class="note" style="margin:8px 0">Cada zona tiene un color según el nivel de contaminación del aire:</p>
+  <div class="l3"><span class="pill" style="background:var(--g)">Verde</span><span>Aire aceptable. Puedes salir con normalidad.</span></div>
+  <div class="l3"><span class="pill" style="background:var(--y)">Amarillo</span><span>Precaución. Reduce las actividades al aire libre con niños y adultos mayores.</span></div>
+  <div class="l3"><span class="pill" style="background:var(--r)">Rojo</span><span>Peligroso. Evita salir con niños y adultos mayores y mantén las ventanas cerradas.</span></div>
+  <p class="note" style="margin:10px 0">Toca una zona del mapa para ver el detalle. Los datos de esta demo son simulados.</p>
+  <button class="btn" id="ok">Entendido</button>
+</div></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const Z=[["Ventanilla",170,103,62],["Carabayllo",340,69,58],["Puente Piedra",272,145,46],["Comas",348,204,30],["Callao",179,238,41],["San Martín de Porres",263,272,34],["Lima Centro",340,326,28],["Ate",458,348,52],["Villa El Salvador",331,445,22]].map(([n,x,y,pm])=>({n,x,y,pm}));
+const H=["#3a8a5c","#d49a1a","#c4493a"],C=["var(--g)","var(--y)","var(--r)"],T=["Aceptable","Precaución","Peligroso"];
+const TIP=["Aire aceptable. Puedes salir con normalidad.","Reduce las actividades al aire libre con niños y adultos mayores.","Evita salir con niños y adultos mayores. Mantén ventanas cerradas."];
+const lv=p=>p>50?2:p>25?1:0;
+let sel=0;
+
+function drawMap(){
+ let s='<defs>'+H.map((c,i)=>`<radialGradient id="h${i}"><stop offset="0" stop-color="${c}" stop-opacity=".55"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></radialGradient>`).join('')+'<pattern id="gr" width="34" height="34" patternUnits="userSpaceOnUse"><path d="M34 0H0V34" fill="none" stroke="#d9d2bf" stroke-width=".6"/></pattern></defs>';
+ s+='<rect width="544" height="510" fill="#efe9db"/><rect width="544" height="510" fill="url(#gr)"/>';
+ s+='<path d="M0 0H110C135 60 100 150 125 230S170 400 215 510H0Z" fill="#c9dbd9" opacity=".8"/>';
+ s+='<text transform="translate(52 300) rotate(-80)" font-size="11" letter-spacing="4" fill="#7f9794" text-anchor="middle">OCÉANO PACÍFICO</text>';
+ s+='<path d="M130 215C250 270 380 295 544 275" fill="none" stroke="#b9cfd3" stroke-width="3"/><text x="430" y="262" font-size="11" font-style="italic" fill="#7f9794">río Rímac</text>';
+ Z.forEach(z=>{s+=`<circle cx="${z.x}" cy="${z.y}" r="80" fill="url(#h${lv(z.pm)})"/>`});
+ Z.forEach((z,i)=>{const l=lv(z.pm);s+=`<g class="zone" data-i="${i}"><circle cx="${z.x}" cy="${z.y}" r="22" fill="transparent"/><circle cx="${z.x}" cy="${z.y}" r="${i==sel?12:9}" fill="${H[l]}" stroke="#fff" stroke-width="${i==sel?4:2.5}"/><text x="${z.x}" y="${z.y+26}" font-size="13" font-weight="600" text-anchor="middle" fill="#1d2a23" stroke="#efe9db" stroke-width="3" paint-order="stroke">${z.n}</text></g>`});
+ $("map").innerHTML=s;
+ $("map").querySelectorAll(".zone").forEach(g=>g.onclick=()=>{sel=+g.dataset.i;render()});
+}
+function drawDetail(){
+ const z=Z[sel],l=lv(z.pm),pct=Math.min(z.pm/90,1)*100;
+ $("det").innerHTML=`<div class="hd"><span class="mono">Distrito seleccionado</span><span class="pill" style="background:${C[l]}">${T[l]}</span></div>
+ <h2 style="font-size:32px">${esc(z.n)}</h2>
+ <div class="big"><svg viewBox="0 0 120 70" width="110" height="64" aria-hidden="true"><path d="M10 62A50 50 0 0 1 110 62" pathLength="100" fill="none" stroke="#ddd6c6" stroke-width="9" stroke-linecap="round"/><path d="M10 62A50 50 0 0 1 110 62" pathLength="100" fill="none" stroke="${H[l]}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${pct} 100"/></svg>
+ <div><span class="n">${Math.round(z.pm)}</span> <small>µg/m³</small><div class="mono">PM2.5 referencial</div></div></div>
+ <div class="tip" style="border-color:${C[l]};background:color-mix(in srgb,${C[l]} 14%,#f5f2ea)">${TIP[l]}</div>
+ <button class="btn" id="go">📣 Denunciar en esta zona</button>`;
+ $("go").onclick=()=>{$("zona").value=z.n;tab(2)};
+}
+function drawRank(){
+ $("rk").innerHTML=[...Z].sort((a,b)=>b.pm-a.pm).map((z,i)=>`<div class="rk ${z===Z[sel]?"on":""}" data-n="${esc(z.n)}"><span class="mono">${String(i+1).padStart(2,"0")}</span><span>${esc(z.n)}</span><b>${z.pm.toFixed(1)}</b></div>`).join("");
+ $("rk").querySelectorAll(".rk").forEach(r=>r.onclick=()=>{sel=Z.findIndex(z=>z.n===r.dataset.n);render()});
+}
+function render(){drawMap();drawDetail();drawRank();$("stamp").textContent="Act. "+new Date().toLocaleTimeString("es-PE")+" · Simulado"}
+setInterval(()=>{Z.forEach(z=>{z.pm=Math.max(8,Math.min(90,z.pm+(Math.random()*6-3)))});render()},4000);
+
+// Denuncias (guardadas solo en este navegador)
+Z.forEach(z=>$("zona").add(new Option(z.n)));
+const TIPOS=["Humo de chimenea","Olor químico","Polvo o partículas","Quema de residuos","Otro"];let tipo=TIPOS[0];
+$("chips").innerHTML=TIPOS.map((t,i)=>`<button type="button" class="chip ${i?"":"on"}">${t}</button>`).join("");
+$("chips").querySelectorAll(".chip").forEach((b,i)=>b.onclick=()=>{tipo=TIPOS[i];$("chips").querySelectorAll(".chip").forEach(x=>x.classList.remove("on"));b.classList.add("on")});
+let R=null;try{R=JSON.parse(localStorage.getItem("as_r2"))}catch(e){}
+if(!Array.isArray(R))R=[{z:"Ventanilla",t:"Humo de chimenea",d:"Humo oscuro frente al parque industrial desde temprano.",n:12,ts:Date.now()-3600000},{z:"Carabayllo",t:"Quema de residuos",d:"Quema de desperdicios o basura en zonas como parques.",n:1,ts:Date.now()-360000}];
+const save=()=>{try{localStorage.setItem("as_r2",JSON.stringify(R))}catch(e){}};
+const ago=ts=>{const m=Math.max(1,Math.round((Date.now()-ts)/60000));return m<60?`hace ${m} min`:`hace ${Math.round(m/60)} h`};
+function drawList(){
+ $("act").textContent=R.length+" activos";
+ $("list").innerHTML=R.map((r,i)=>{const st=r.n>=10?3:r.n>=3?2:1,et=["","Recibida","Expediente colectivo","Listo para presentar (simulado)"][st];
+ return `<div class="ex"><div class="row"><div><div class="mono">${esc(r.z)} · ${ago(r.ts)}</div><h2 style="font-size:18px;margin-top:2px">${esc(r.t)}</h2></div><button class="sum" data-i="${i}" ${r.j?"disabled":""}>${r.j?"✓ Sumado":"Sumarme"}</button></div>
+ <div style="margin-top:6px">${esc(r.d)}</div><div class="segs">${[1,2,3].map(k=>`<i class="${k<=st?"f":""}"></i>`).join("")}</div>
+ <div class="row"><span class="small mono"><b>${r.n}</b> ${r.n==1?"vecino":"vecinos"}</span><span class="mono">${et}</span></div></div>`}).join("");
+ $("list").querySelectorAll(".sum").forEach(b=>b.onclick=()=>{const r=R[+b.dataset.i];if(!r.j){r.j=true;r.n++;save();drawList()}});
+}
+$("desc").oninput=()=>{const n=$("desc").value.trim().length;$("cnt").textContent=n+" / 10 mín.";$("send").disabled=n<10};
+$("foto").onchange=e=>{const f=e.target.files[0],p=$("prev");p.innerHTML="";if(!f)return;const u=URL.createObjectURL(f);
+ const el=document.createElement(f.type.startsWith("image")?"img":"video");el.className="pv";el.src=u;if(el.tagName=="VIDEO")el.controls=true;p.append(el)};
+$("send").onclick=()=>{
+ R.unshift({z:$("zona").value,t:tipo,d:$("desc").value.trim(),n:1,j:true,ts:Date.now()});save();drawList();
+ $("desc").value="";$("foto").value="";$("prev").innerHTML="";$("cnt").textContent="0 / 10 mín.";$("send").disabled=true;
+ $("msg").textContent="✅ Denuncia registrada en esta demo (no se envía a ninguna autoridad). Compártela con tus vecinos para que se sumen.";
+};
+function tab(n){
+ $("v1").classList.toggle("hide",n!=1);$("v2").classList.toggle("hide",n!=2);
+ $("b1").classList.toggle("on",n==1);$("b2").classList.toggle("on",n==2);scrollTo(0,0);
+}
+$("b1").onclick=()=>tab(1);$("b2").onclick=()=>tab(2);
+$("ok").onclick=()=>$("intro").classList.add("hide");
+$("help").onclick=()=>$("intro").classList.remove("hide");
+render();drawList();
+</script>
+</body></html>
