@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f3d36">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>AireSano</title>
+<style>
+:root{--bg:#e8eee9;--ink:#1f3d36;--card:#fff;--mut:#5c6f69;--ok:#4f8a5b;--mid:#d9a521;--bad:#c0453a}
+*{box-sizing:border-box;margin:0}
+body{font-family:Georgia,serif;background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:84px}
+header{background:var(--ink);color:#fff;padding:calc(env(safe-area-inset-top,0px) + 18px) 18px 18px}
+header h1{font-size:28px;font-weight:700}
+header p{font:13px system-ui,sans-serif;opacity:.8;margin-top:2px}
+main{padding:16px;max-width:560px;margin:auto}
+h2{font-size:19px;margin:6px 0 10px}
+.sys{font-family:system-ui,sans-serif}
+.legend{display:flex;gap:8px;font:12px system-ui;margin-bottom:12px;flex-wrap:wrap}
+.legend span{display:flex;align-items:center;gap:5px}
+.dot{width:12px;height:12px;border-radius:50%;display:inline-block}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tile{border:0;border-radius:10px;padding:14px 6px;color:#fff;font:600 13px system-ui;text-align:center;cursor:pointer}
+.tile b{display:block;font:700 22px Georgia,serif;margin-top:4px}
+.tile:focus-visible,button:focus-visible{outline:3px solid #000;outline-offset:2px}
+.detail{background:var(--card);border-radius:12px;padding:14px;margin:14px 0;font:14px/1.5 system-ui}
+.row{display:flex;justify-content:space-between;align-items:center;background:var(--card);border-radius:10px;padding:10px 12px;margin-bottom:6px;font:14px system-ui}
+.pill{color:#fff;border-radius:99px;padding:2px 10px;font-weight:600}
+label{display:block;font:600 13px system-ui;margin:12px 0 4px}
+select,textarea{width:100%;padding:10px;border:1px solid #b9c7c1;border-radius:8px;font:15px system-ui;background:#fff}
+textarea{min-height:90px}
+.btn{width:100%;margin-top:14px;padding:13px;border:0;border-radius:10px;background:var(--ink);color:#fff;font:600 16px system-ui}
+.btn.alt{background:#fff;color:var(--ink);border:1px solid var(--ink)}
+.bar{height:8px;background:#cfd9d4;border-radius:9px;overflow:hidden;margin:6px 0}
+.bar i{display:block;height:100%;background:var(--ok)}
+.exp{background:var(--card);border-radius:10px;padding:12px;margin-bottom:8px;font:14px system-ui}
+.note{font:12px/1.4 system-ui;color:var(--mut);margin:12px 0}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#fff;border-top:1px solid #c5d1cb;padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{flex:1;padding:12px;border:0;background:none;font:600 14px system-ui;color:var(--mut)}
+nav button.on{color:var(--ink);box-shadow:inset 0 3px 0 var(--ink)}
+.view{display:none}.view.on{display:block}
+#prev{max-width:100%;border-radius:8px;margin-top:8px;display:none}
+#msg{font:600 14px system-ui;color:var(--ok);margin-top:10px}
+</style>
+</head>
+<body>
+<header><h1>🌿 AireSano</h1><p>Calidad del aire y denuncia colectiva en Lima y Callao</p></header>
+<main>
+<section id="v-mapa" class="view on">
+  <h2>Mapa de calor (PM2.5 µg/m³)</h2>
+  <div class="legend"><span><i class="dot" style="background:var(--ok)"></i>0–25 Aceptable</span><span><i class="dot" style="background:var(--mid)"></i>26–50 Precaución</span><span><i class="dot" style="background:var(--bad)"></i>&gt;50 Peligroso</span></div>
+  <div class="grid" id="grid"></div>
+  <div class="detail" id="detail">Toca una zona para ver qué hacer hoy.</div>
+  <h2>Ranking de distritos</h2>
+  <div id="rank"></div>
+  <p class="note">Datos simulados para validar el MVP. En la versión real vendrán de sensores o fuentes oficiales.</p>
+</section>
+
+<section id="v-den" class="view">
+  <h2>Nueva denuncia vecinal</h2>
+  <label for="zona">Zona</label><select id="zona"></select>
+  <label for="tipo">¿Qué observas?</label>
+  <select id="tipo"><option>Humo de chimeneas</option><option>Olor químico</option><option>Polvo en el aire</option><option>Quema de residuos</option><option>Otro</option></select>
+  <label for="desc">Descripción (mínimo 10 caracteres)</label><textarea id="desc"></textarea>
+  <label for="foto">Evidencia (opcional)</label><input type="file" id="foto" accept="image/*,video/*"><img id="prev" alt="Vista previa">
+  <button class="btn" id="send">Enviar denuncia</button>
+  <p id="msg" role="status"></p>
+</section>
+
+<section id="v-exp" class="view">
+  <h2>Expedientes comunitarios</h2>
+  <p class="note" style="margin-top:0">Con 3 vecinos se arma un expediente colectivo; con 10 queda listo para presentarse a la OEFA y a la municipalidad. Prueba piloto: las denuncias se guardan solo en este teléfono y no se envían a ninguna entidad.</p>
+  <div id="exps"></div>
+  <button class="btn alt" id="reset">Borrar mis denuncias de prueba</button>
+  <button class="btn" id="install" style="display:none">Instalar AireSano</button>
+  <p class="note" id="ios" style="display:none">En iPhone: toca Compartir y luego «Agregar a pantalla de inicio».</p>
+</section>
+</main>
+<nav>
+  <button class="on" data-v="mapa">🗺️ Mapa</button>
+  <button data-v="den">📣 Denunciar</button>
+  <button data-v="exp">📁 Expedientes</button>
+</nav>
+<script>
+const Z=[["Ventanilla",47],["Carabayllo",41],["Comas",37],["Callao",54],["Los Olivos",33],["San Juan de Lurigancho",44],["Lima Cercado",31],["Santa Anita",52],["Ate",58],["Villa El Salvador",29]];
+const BASE={"Ate":2,"Callao":3,"Santa Anita":1,"Ventanilla":1};
+const col=v=>v>50?"var(--bad)":v>25?"var(--mid)":"var(--ok)";
+const lab=v=>v>50?"Peligroso":v>25?"Precaución":"Aceptable";
+const tips={Peligroso:"Evita salir con niños y adultos mayores y mantén las ventanas cerradas.",Precaución:"Reduce las actividades al aire libre con niños y adultos mayores.",Aceptable:"Puedes salir con normalidad."};
+const $=id=>document.getElementById(id);
+let den=[];try{den=JSON.parse(localStorage.getItem("airesano")||"[]")}catch(e){}
+const save=()=>{try{localStorage.setItem("airesano",JSON.stringify(den))}catch(e){}};
+$("grid").innerHTML=Z.map(([n,v],i)=>`<button class="tile" style="background:${col(v)}" data-i="${i}">${n}<b>${v}</b></button>`).join("");
+$("grid").onclick=e=>{const t=e.target.closest(".tile");if(!t)return;const [n,v]=Z[t.dataset.i];$("detail").innerHTML=`<b>${n}</b>: ${v} µg/m³ · ${lab(v)}<br>${tips[lab(v)]}`};
+$("rank").innerHTML=[...Z].sort((a,b)=>b[1]-a[1]).map(([n,v])=>`<div class="row"><span>${n}</span><span class="pill" style="background:${col(v)}">${v}</span></div>`).join("");
+$("zona").innerHTML=Z.map(z=>`<option>${z[0]}</option>`).join("");
+function renderExp(){
+  const c={};Z.forEach(([n])=>c[n]=(BASE[n]||0));den.forEach(d=>c[d.zona]=(c[d.zona]||0)+1);
+  $("exps").innerHTML=Object.entries(c).filter(([,k])=>k>0).sort((a,b)=>b[1]-a[1]).map(([n,k])=>{
+    const st=k>=10?"Listo para presentarse":k>=3?"Expediente colectivo armado":"Faltan "+(3-k)+" vecino(s) para armarlo";
+    return `<div class="exp"><b>${n}</b> · ${k} denuncia(s)<div class="bar"><i style="width:${Math.min(k/10*100,100)}%"></i></div>${st}</div>`}).join("")||"Aún no hay denuncias.";
+}
+renderExp();
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("nav button,.view").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on");$("v-"+b.dataset.v).classList.add("on");scrollTo(0,0)});
+$("foto").onchange=e=>{const f=e.target.files[0],p=$("prev");if(f&&f.type.startsWith("image/")){p.src=URL.createObjectURL(f);p.style.display="block"}else p.style.display="none"};
+$("send").onclick=()=>{
+  const d=$("desc").value.trim(),m=$("msg");
+  if(d.length<10){m.style.color="var(--bad)";m.textContent="Escribe al menos 10 caracteres en la descripción.";return}
+  den.push({zona:$("zona").value,tipo:$("tipo").value,desc:d,fecha:new Date().toISOString()});save();
+  $("desc").value="";$("foto").value="";$("prev").style.display="none";
+  m.style.color="var(--ok)";m.textContent="Denuncia enviada. Gracias por sumarte.";renderExp()};
+$("reset").onclick=()=>{den=[];save();renderExp()};
+let dp;addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e;$("install").style.display="block"});
+$("install").onclick=async()=>{if(dp){dp.prompt();dp=null;$("install").style.display="none"}};
+if(/iphone|ipad/i.test(navigator.userAgent))$("ios").style.display="block";
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
