@@ -108,12 +108,20 @@ document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("nav button,.view").forEach(x=>x.classList.remove("on"));
   b.classList.add("on");$("v-"+b.dataset.v).classList.add("on");scrollTo(0,0)});
 $("foto").onchange=e=>{const f=e.target.files[0],p=$("prev");if(f&&f.type.startsWith("image/")){p.src=URL.createObjectURL(f);p.style.display="block"}else p.style.display="none"};
-$("send").onclick=()=>{
+const URL_HOJA="https://script.google.com/macros/s/AKfycbwGmvHytocg1G897AIcQAa3dQf9T1e_hPyfP1Bx2sn0G9VDHyDA64gPCV6pmldrd7hs7g/exec";
+$("send").onclick=async()=>{
   const d=$("desc").value.trim(),m=$("msg");
   if(d.length<10){m.style.color="var(--bad)";m.textContent="Escribe al menos 10 caracteres en la descripción.";return}
-  den.push({zona:$("zona").value,tipo:$("tipo").value,desc:d,fecha:new Date().toISOString()});save();
-  $("desc").value="";$("foto").value="";$("prev").style.display="none";
-  m.style.color="var(--ok)";m.textContent="Denuncia enviada. Gracias por sumarte.";renderExp()};
+  const r={zona:$("zona").value,tipo:$("tipo").value,desc:d};
+  den.push({...r,fecha:new Date().toISOString()});save();
+  $("desc").value="";$("foto").value="";$("prev").style.display="none";renderExp();
+  m.style.color="var(--mut)";m.textContent="Enviando…";
+  try{
+    await fetch(URL_HOJA,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(r)});
+    m.style.color="var(--ok)";m.textContent="Denuncia enviada. Gracias por sumarte."
+  }catch(e){
+    m.style.color="var(--bad)";m.textContent="Se guardó en tu teléfono, pero no hay internet para enviarla a la hoja."
+  }};
 $("reset").onclick=()=>{den=[];save();renderExp()};
 let dp;addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e;$("install").style.display="block"});
 $("install").onclick=async()=>{if(dp){dp.prompt();dp=null;$("install").style.display="none"}};
