@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1f3d36">
 <link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -26,6 +28,8 @@ h2{font-size:19px;margin:6px 0 10px}
 .tile{border:0;border-radius:10px;padding:14px 6px;color:#fff;font:600 13px system-ui;text-align:center;cursor:pointer}
 .tile b{display:block;font:700 22px Georgia,serif;margin-top:4px}
 .tile:focus-visible,button:focus-visible{outline:3px solid #000;outline-offset:2px}
+#map{height:320px;border-radius:12px;margin-bottom:10px;z-index:0}
+.lbl{background:none;border:0;box-shadow:none;color:#fff;font:700 11px system-ui;padding:0}.lbl:before{display:none}
 .detail{background:var(--card);border-radius:12px;padding:14px;margin:14px 0;font:14px/1.5 system-ui}
 .row{display:flex;justify-content:space-between;align-items:center;background:var(--card);border-radius:10px;padding:10px 12px;margin-bottom:6px;font:14px system-ui}
 .pill{color:#fff;border-radius:99px;padding:2px 10px;font-weight:600}
@@ -52,8 +56,9 @@ nav button.on{color:var(--ink);box-shadow:inset 0 3px 0 var(--ink)}
 <section id="v-mapa" class="view on">
   <h2>Mapa de calor (PM2.5 µg/m³)</h2>
   <div class="legend"><span><i class="dot" style="background:var(--ok)"></i>0–25 Aceptable</span><span><i class="dot" style="background:var(--mid)"></i>26–50 Precaución</span><span><i class="dot" style="background:var(--bad)"></i>&gt;50 Peligroso</span></div>
-  <div class="grid" id="grid"></div>
-  <div class="detail" id="detail">Toca una zona para ver qué hacer hoy.</div>
+  <div id="map"></div>
+  <div class="grid" id="grid" style="display:none"></div>
+  <div class="detail" id="detail">Toca un punto del mapa para ver qué hacer hoy.</div>
   <h2>Ranking de distritos</h2>
   <div id="rank"></div>
   <p class="note">Datos simulados para validar el MVP. En la versión real vendrán de sensores o fuentes oficiales.</p>
@@ -94,7 +99,17 @@ const $=id=>document.getElementById(id);
 let den=[];try{den=JSON.parse(localStorage.getItem("airesano")||"[]")}catch(e){}
 const save=()=>{try{localStorage.setItem("airesano",JSON.stringify(den))}catch(e){}};
 $("grid").innerHTML=Z.map(([n,v],i)=>`<button class="tile" style="background:${col(v)}" data-i="${i}">${n}<b>${v}</b></button>`).join("");
-$("grid").onclick=e=>{const t=e.target.closest(".tile");if(!t)return;const [n,v]=Z[t.dataset.i];$("detail").innerHTML=`<b>${n}</b>: ${v} µg/m³ · ${lab(v)}<br>${tips[lab(v)]}`};
+const showDet=i=>{const [n,v]=Z[i];$("detail").innerHTML=`<b>${n}</b>: ${v} µg/m³ · ${lab(v)}<br>${tips[lab(v)]}`};
+$("grid").onclick=e=>{const t=e.target.closest(".tile");if(t)showDet(t.dataset.i)};
+const XY={"Ventanilla":[-11.875,-77.125],"Carabayllo":[-11.86,-77.03],"Comas":[-11.935,-77.06],"Callao":[-12.056,-77.118],"Los Olivos":[-11.99,-77.07],"San Juan de Lurigancho":[-12.005,-77.0],"Lima Cercado":[-12.046,-77.043],"Santa Anita":[-12.045,-76.97],"Ate":[-12.026,-76.917],"Villa El Salvador":[-12.213,-76.938]};
+const hex=v=>v>50?"#c0453a":v>25?"#d9a521":"#4f8a5b";
+if(window.L){
+  window.map=L.map("map").setView([-12.0,-77.04],10);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:17,attribution:"© OpenStreetMap"}).addTo(map);
+  Z.forEach(([n,v],i)=>{const c=hex(v),p=XY[n];
+    [[5200,.14],[3500,.18],[1900,.24]].forEach(([r,o])=>L.circle(p,{radius:r,stroke:false,fillColor:c,fillOpacity:o,interactive:false}).addTo(map));
+    L.circleMarker(p,{radius:14,color:"#fff",weight:2,fillColor:c,fillOpacity:1}).addTo(map).bindTooltip(String(v),{permanent:true,direction:"center",className:"lbl"}).on("click",()=>showDet(i))});
+}else{$("map").style.display="none";$("grid").style.display="grid"}
 $("rank").innerHTML=[...Z].sort((a,b)=>b[1]-a[1]).map(([n,v])=>`<div class="row"><span>${n}</span><span class="pill" style="background:${col(v)}">${v}</span></div>`).join("");
 $("zona").innerHTML=Z.map(z=>`<option>${z[0]}</option>`).join("");
 function renderExp(){
@@ -106,7 +121,7 @@ function renderExp(){
 renderExp();
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("nav button,.view").forEach(x=>x.classList.remove("on"));
-  b.classList.add("on");$("v-"+b.dataset.v).classList.add("on");scrollTo(0,0)});
+  b.classList.add("on");$("v-"+b.dataset.v).classList.add("on");scrollTo(0,0);if(window.map&&b.dataset.v==="mapa")setTimeout(()=>map.invalidateSize(),60)});
 $("foto").onchange=e=>{const f=e.target.files[0],p=$("prev");if(f&&f.type.startsWith("image/")){p.src=URL.createObjectURL(f);p.style.display="block"}else p.style.display="none"};
 function comprimir(file){return new Promise((ok,no)=>{
   const img=new Image();img.onload=()=>{
